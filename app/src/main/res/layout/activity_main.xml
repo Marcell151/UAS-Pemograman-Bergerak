@@ -37,7 +37,6 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/tvWelcomeMessage"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Halo, Mahasiswa! 👋"
@@ -63,85 +62,52 @@
                     android:alpha="0.9"
                     android:layout_marginTop="8dp"/>
 
-                <!-- Cart Badge & Logout -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
+                <!-- Cart Badge -->
+                <RelativeLayout
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
                     android:layout_marginTop="20dp">
 
-                    <!-- Cart Badge -->
-                    <RelativeLayout
+                    <androidx.cardview.widget.CardView
                         android:layout_width="56dp"
                         android:layout_height="56dp"
-                        android:layout_marginEnd="12dp">
-
-                        <androidx.cardview.widget.CardView
-                            android:layout_width="56dp"
-                            android:layout_height="56dp"
-                            app:cardCornerRadius="28dp"
-                            app:cardElevation="4dp"
-                            android:clickable="true"
-                            android:foreground="?android:attr/selectableItemBackground"
-                            android:id="@+id/cardCart">
-
-                            <RelativeLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:background="@color/white">
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="🛒"
-                                    android:textSize="24sp"
-                                    android:layout_centerInParent="true"/>
-
-                            </RelativeLayout>
-
-                        </androidx.cardview.widget.CardView>
-
-                        <TextView
-                            android:id="@+id/tvCartBadge"
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:layout_alignParentEnd="true"
-                            android:layout_alignParentTop="true"
-                            android:background="@android:drawable/button_onoff_indicator_on"
-                            android:gravity="center"
-                            android:text="0"
-                            android:textColor="@color/white"
-                            android:textSize="11sp"
-                            android:textStyle="bold"
-                            android:visibility="gone"/>
-
-                    </RelativeLayout>
-
-                    <!-- Logout Button -->
-                    <androidx.cardview.widget.CardView
-                        android:id="@+id/btnLogoutCustomer"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        app:cardCornerRadius="12dp"
+                        app:cardCornerRadius="28dp"
                         app:cardElevation="4dp"
                         android:clickable="true"
-                        android:foreground="?android:attr/selectableItemBackground">
+                        android:foreground="?android:attr/selectableItemBackground"
+                        android:id="@+id/cardCart">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="🚪 Logout"
-                            android:textSize="14sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/primary"
-                            android:paddingStart="16dp"
-                            android:paddingEnd="16dp"
-                            android:paddingTop="16dp"
-                            android:paddingBottom="16dp"/>
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@color/white">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="🛒"
+                                android:textSize="24sp"
+                                android:layout_centerInParent="true"/>
+
+                        </RelativeLayout>
 
                     </androidx.cardview.widget.CardView>
 
-                </LinearLayout>
+                    <TextView
+                        android:id="@+id/tvCartBadge"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentTop="true"
+                        android:background="@android:drawable/button_onoff_indicator_on"
+                        android:gravity="center"
+                        android:text="0"
+                        android:textColor="@color/white"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:visibility="gone"/>
+
+                </RelativeLayout>
 
             </LinearLayout>
 
@@ -406,6 +372,191 @@
                 </LinearLayout>
 
             </androidx.cardview.widget.CardView>
+
+            <!-- Popular Stands Preview -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🔥 Stand Populer"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_dark"
+                android:layout_marginBottom="16dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="4dp"
+                    android:layout_marginBottom="12dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="16dp"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="🍱"
+                            android:textSize="40sp"/>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:layout_marginStart="16dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Warung Nasi Bu Sari"
+                                android:textSize="16sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/text_dark"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Makanan Berat • 5 Menu"
+                                android:textSize="12sp"
+                                android:textColor="@color/text_gray"
+                                android:layout_marginTop="4dp"/>
+
+                        </LinearLayout>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="→"
+                            android:textSize="24sp"
+                            android:textColor="@color/primary"/>
+
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="4dp"
+                    android:layout_marginBottom="12dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="16dp"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="🥤"
+                            android:textSize="40sp"/>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:layout_marginStart="16dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Minuman Fresh Pak Danu"
+                                android:textSize="16sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/text_dark"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Minuman Segar • 5 Menu"
+                                android:textSize="12sp"
+                                android:textColor="@color/text_gray"
+                                android:layout_marginTop="4dp"/>
+
+                        </LinearLayout>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="→"
+                            android:textSize="24sp"
+                            android:textColor="@color/primary"/>
+
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="4dp"
+                    android:layout_marginBottom="32dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="16dp"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="🍟"
+                            android:textSize="40sp"/>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:layout_marginStart="16dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Snack Corner Mbak Lia"
+                                android:textSize="16sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/text_dark"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Cemilan • 5 Menu"
+                                android:textSize="12sp"
+                                android:textColor="@color/text_gray"
+                                android:layout_marginTop="4dp"/>
+
+                        </LinearLayout>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="→"
+                            android:textSize="24sp"
+                            android:textColor="@color/primary"/>
+
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+            </LinearLayout>
 
         </LinearLayout>
 
