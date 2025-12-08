@@ -1,8 +1,11 @@
 package com.example.kantinkampus;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
@@ -14,115 +17,119 @@ import java.util.List;
 import java.util.Locale;
 
 public class CartActivity extends AppCompatActivity implements CartAdapter.OnCartItemListener {
+
     private RecyclerView rvCart;
-    private CartAdapter cartAdapter;
-    private DBHelper dbHelper;
     private TextView tvTotal, btnCheckout;
     private LinearLayout tvEmptyCart, layoutCheckout;
+
+    private CartAdapter cartAdapter;
+    private DBHelper dbHelper;
+    private SessionManager sessionManager;
+    private int userId;
+    private List<CartItem> currentCartItems;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cart);
 
+        sessionManager = new SessionManager(this);
         dbHelper = new DBHelper(this);
+        userId = sessionManager.getUserId();
 
+        // Init Views
         rvCart = findViewById(R.id.rvCart);
         tvTotal = findViewById(R.id.tvTotal);
         tvEmptyCart = findViewById(R.id.tvEmptyCart);
+        layoutCheckout = findViewById(R.id.layoutCheckout); // Pastikan ID ini ada di XML (LinearLayout pembungkus tombol checkout)
         btnCheckout = findViewById(R.id.btnCheckout);
-        layoutCheckout = findViewById(R.id.layoutCheckout);
 
         rvCart.setLayoutManager(new LinearLayoutManager(this));
 
-        loadCart();
+        // Checkout Button Listener
+        btnCheckout.setOnClickListener(v -> showPaymentDialog());
 
-        btnCheckout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                checkout();
-            }
-        });
+        loadCart();
     }
 
     private void loadCart() {
-        List<CartItem> cartItems = dbHelper.getCartItems();
+        currentCartItems = dbHelper.getCartItems(userId);
 
-        if (cartItems.isEmpty()) {
+        if (currentCartItems.isEmpty()) {
             rvCart.setVisibility(View.GONE);
-            layoutCheckout.setVisibility(View.GONE);
             tvEmptyCart.setVisibility(View.VISIBLE);
+            layoutCheckout.setVisibility(View.GONE); // Sembunyikan tombol checkout jika kosong
         } else {
             rvCart.setVisibility(View.VISIBLE);
-            layoutCheckout.setVisibility(View.VISIBLE);
             tvEmptyCart.setVisibility(View.GONE);
+            layoutCheckout.setVisibility(View.VISIBLE);
 
-            cartAdapter = new CartAdapter(this, cartItems, this);
+            cartAdapter = new CartAdapter(this, currentCartItems, this);
             rvCart.setAdapter(cartAdapter);
 
-            updateTotal(cartItems);
+            calculateTotal();
         }
     }
 
-    private void updateTotal(List<CartItem> cartItems) {
+    private void calculateTotal() {
         int total = 0;
-        for (CartItem item : cartItems) {
-            total += item.getSubtotal();
+        for (CartItem item : currentCartItems) {
+            total += (item.getMenu().getHarga() * item.getQty());
         }
 
         NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("id", "ID"));
         tvTotal.setText(formatter.format(total));
     }
 
-    @Override
-    public void onQuantityChanged() {
-        loadCart();
-    }
-
-    private void checkout() {
-        List<CartItem> cartItems = dbHelper.getCartItems();
-        if (cartItems.isEmpty()) {
-            Toast.makeText(this, "Keranjang kosong", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        // Calculate total
-        int total = 0;
-        StringBuilder items = new StringBuilder();
-        for (CartItem item : cartItems) {
-            total += item.getSubtotal();
-            items.append(item.getMenu().getNama())
-                    .append(" (")
-                    .append(item.getQty())
-                    .append("x)\n");
-        }
-
-        // Show confirmation dialog
+    private void showPaymentDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("✅ Konfirmasi Pesanan");
-        builder.setMessage("Total: " + NumberFormat.getCurrencyInstance(new Locale("id", "ID")).format(total) + "\n\nLanjutkan pesanan?");
+        LayoutInflater inflater = getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_payment_method, null);
+        builder.setView(dialogView);
 
-        final int finalTotal = total;
-        final String finalItems = items.toString();
+        RadioGroup rgPayment = dialogView.findViewById(R.id.rgPaymentMethod);
 
-        builder.setPositiveButton("Ya, Pesan! 🍽️", (dialog, which) -> {
-            // Save to history
-            dbHelper.addToHistory(finalItems, finalTotal);
+        AlertDialog dialog = builder.create();
 
-            // Clear cart
-            dbHelper.clearCart();
+        // Tambahkan tombol konfirmasi di dialog
+        // Kita bisa tambahkan button programmatically karena di XML dialog mungkin belum ada
+        dialog.setButton(AlertDialog.BUTTON_POSITIVE, "Bayar & Pesan", (d, w) -> {
+            int selectedId = rgPayment.getCheckedRadioButtonId();
+            String paymentMethod = "cash"; // Default
 
-            // Show success message
-            Toast.makeText(CartActivity.this, "✅ Pesanan berhasil! Menunggu diproses... 🍽️", Toast.LENGTH_LONG).show();
+            if (selectedId == R.id.rbOvo) paymentMethod = "ovo";
+            else if (selectedId == R.id.rbGopay) paymentMethod = "gopay";
+            else if (selectedId == R.id.rbBankTransfer) paymentMethod = "transfer";
 
-            // Reload cart
-            loadCart();
-
-            // Close activity after delay
-            new android.os.Handler().postDelayed(() -> finish(), 1500);
+            processCheckout(paymentMethod);
         });
 
-        builder.setNegativeButton("Batal", null);
-        builder.show();
+        dialog.setButton(AlertDialog.BUTTON_NEGATIVE, "Batal", (d, w) -> dialog.dismiss());
+        dialog.show();
+    }
+
+    private void processCheckout(String paymentMethod) {
+        // Logic: Jika metode bukan cash, harusnya ada upload bukti.
+        // Untuk simplifikasi tugas ini, kita anggap user sudah transfer dan lanjut.
+
+        // Panggil method DBHelper yang sudah canggih (otomatis pecah order per stand)
+        dbHelper.createOrderFromCart(userId, currentCartItems, paymentMethod, null);
+
+        String msg = paymentMethod.equals("cash") ?
+                "Pesanan dibuat! Silakan bayar di kasir." :
+                "Pesanan dibuat! Menunggu verifikasi penjual.";
+
+        Toast.makeText(this, "✅ " + msg, Toast.LENGTH_LONG).show();
+
+        // Redirect ke History
+        Intent intent = new Intent(CartActivity.this, OrderHistoryActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); // Agar tidak back ke cart
+        startActivity(intent);
+        finish();
+    }
+
+    @Override
+    public void onQuantityChanged() {
+        loadCart(); // Refresh cart jika qty berubah/dihapus
     }
 }

@@ -1,6 +1,7 @@
 package com.example.kantinkampus;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,10 +43,37 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MenuViewHolder
         String hargaFormatted = formatter.format(menu.getHarga());
         holder.tvMenuHarga.setText(hargaFormatted);
 
+        // Show rating if available
+        if (menu.getTotalReviews() > 0) {
+            String ratingText = String.format(Locale.getDefault(), "⭐ %.1f (%d)",
+                    menu.getAverageRating(), menu.getTotalReviews());
+            holder.tvMenuNama.setText(menu.getNama() + "\n" + ratingText);
+        }
+
+        // Add to cart button
         holder.btnTambah.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 listener.onAddToCart(menu);
+            }
+        });
+
+        // Click on item to view detail
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context, MenuDetailActivity.class);
+                intent.putExtra("menu_id", menu.getId());
+                context.startActivity(intent);
+            }
+        });
+
+        // Long press to add to favorites
+        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                // This will be handled in MenuDetailActivity
+                return true;
             }
         });
     }

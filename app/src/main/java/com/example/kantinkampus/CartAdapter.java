@@ -60,8 +60,21 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             @Override
             public void onClick(View v) {
                 int newQty = item.getQty() - 1;
-                dbHelper.updateCartQty(item.getId(), newQty);
-                listener.onQuantityChanged();
+                if (newQty <= 0) {
+                    // Show confirmation before removing
+                    new androidx.appcompat.app.AlertDialog.Builder(context)
+                            .setTitle("Hapus Item")
+                            .setMessage("Hapus " + menu.getNama() + " dari keranjang?")
+                            .setPositiveButton("Ya", (dialog, which) -> {
+                                dbHelper.updateCartQty(item.getId(), 0);
+                                listener.onQuantityChanged();
+                            })
+                            .setNegativeButton("Tidak", null)
+                            .show();
+                } else {
+                    dbHelper.updateCartQty(item.getId(), newQty);
+                    listener.onQuantityChanged();
+                }
             }
         });
     }

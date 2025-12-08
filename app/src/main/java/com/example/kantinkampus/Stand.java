@@ -4,6 +4,8 @@ public class Stand {
     private int id;
     private String nama;
     private String deskripsi;
+    private String image;
+    private int ownerId;
 
     public Stand() {}
 
@@ -13,6 +15,7 @@ public class Stand {
         this.deskripsi = deskripsi;
     }
 
+    // Getters and Setters
     public int getId() {
         return id;
     }
@@ -35,5 +38,30 @@ public class Stand {
 
     public void setDeskripsi(String deskripsi) {
         this.deskripsi = deskripsi;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
+
+    public int getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(int ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    @Override
+    public String toString() {
+        return "Stand{" +
+                "id=" + id +
+                ", nama='" + nama + '\'' +
+                ", deskripsi='" + deskripsi + '\'' +
+                '}';
     }
 }
