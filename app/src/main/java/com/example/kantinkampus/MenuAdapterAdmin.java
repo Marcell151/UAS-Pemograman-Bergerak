@@ -1,7 +1,6 @@
 package com.example.kantinkampus;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -14,20 +13,22 @@ import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 import java.io.InputStream;
+import java.text.NumberFormat;
 import java.util.List;
+import java.util.Locale;
 
-public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MenuViewHolder> {
-
+public class MenuAdapterAdmin extends RecyclerView.Adapter<MenuAdapterAdmin.MenuViewHolder> {
     private Context context;
     private List<Menu> menuList;
-    private OnMenuClickListener listener;
+    private OnMenuActionListener listener;
 
-    // Interface untuk komunikasi ke Activity
-    public interface OnMenuClickListener {
-        void onAddToCart(Menu menu);
+    public interface OnMenuActionListener {
+        void onToggleStatus(Menu menu);
+        void onEditMenu(Menu menu);
+        void onDeleteMenu(Menu menu);
     }
 
-    public MenuAdapter(Context context, List<Menu> menuList, OnMenuClickListener listener) {
+    public MenuAdapterAdmin(Context context, List<Menu> menuList, OnMenuActionListener listener) {
         this.context = context;
         this.menuList = menuList;
         this.listener = listener;
@@ -36,21 +37,21 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MenuViewHolder
     @NonNull
     @Override
     public MenuViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.menu_item, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.menu_item_admin, parent, false);
         return new MenuViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull MenuViewHolder holder, int position) {
         Menu menu = menuList.get(position);
+        NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("id", "ID"));
 
-        // 1. Set Data Teks
         holder.tvMenuNama.setText(menu.getNama());
+        holder.tvMenuDeskripsi.setText(menu.getDeskripsi());
+        holder.tvMenuKategori.setText(menu.getKategori());
+        holder.tvMenuHarga.setText(formatter.format(menu.getHarga()));
 
-        // GUNAKAN FORMAT RUPIAH BARU
-        holder.tvMenuHarga.setText(FormatHelper.formatRupiah(menu.getHarga()));
-
-        // 2. LOGIKA GAMBAR (Dengan Resize agar ringan)
+        // --- LOGIKA GAMBAR DENGAN RESIZE ---
         if (menu.getImage() != null && !menu.getImage().isEmpty()) {
             // Langsung baca file path
             Bitmap bitmap = BitmapFactory.decodeFile(menu.getImage());
@@ -69,31 +70,17 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MenuViewHolder
             holder.tvMenuIcon.setVisibility(View.VISIBLE);
         }
 
-        // 3. LOGIKA STOK (Habis/Tersedia)
         if (menu.isAvailable()) {
-            holder.btnTambah.setText("+ Tambah");
-            holder.cardBtnTambah.setCardBackgroundColor(context.getResources().getColor(R.color.primary));
-            holder.cardBtnTambah.setEnabled(true);
+            holder.tvMenuStatus.setText("Tersedia");
+            holder.cardMenuStatus.setCardBackgroundColor(context.getResources().getColor(R.color.success));
         } else {
-            holder.btnTambah.setText("Habis");
-            holder.cardBtnTambah.setCardBackgroundColor(context.getResources().getColor(R.color.text_gray));
-            holder.cardBtnTambah.setEnabled(false);
+            holder.tvMenuStatus.setText("Habis");
+            holder.cardMenuStatus.setCardBackgroundColor(context.getResources().getColor(R.color.danger));
         }
 
-        // 4. LISTENERS
-        // Klik Tombol Tambah
-        holder.cardBtnTambah.setOnClickListener(v -> {
-            if (menu.isAvailable()) {
-                listener.onAddToCart(menu);
-            }
-        });
-
-        // Klik Item (Buka Detail)
-        holder.itemView.setOnClickListener(v -> {
-            Intent intent = new Intent(context, MenuDetailActivity.class);
-            intent.putExtra("menu_id", menu.getId());
-            context.startActivity(intent);
-        });
+        holder.btnToggleStatus.setOnClickListener(v -> listener.onToggleStatus(menu));
+        holder.btnEditMenu.setOnClickListener(v -> listener.onEditMenu(menu));
+        holder.btnDeleteMenu.setOnClickListener(v -> listener.onDeleteMenu(menu));
     }
 
     @Override
@@ -102,18 +89,23 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.MenuViewHolder
     }
 
     public static class MenuViewHolder extends RecyclerView.ViewHolder {
-        TextView tvMenuNama, tvMenuHarga, tvMenuIcon, btnTambah;
+        TextView tvMenuNama, tvMenuDeskripsi, tvMenuKategori, tvMenuHarga, tvMenuStatus, tvMenuIcon;
         ImageView ivMenuImage;
-        CardView cardBtnTambah;
+        CardView btnToggleStatus, btnEditMenu, btnDeleteMenu, cardMenuStatus;
 
         public MenuViewHolder(@NonNull View itemView) {
             super(itemView);
             tvMenuNama = itemView.findViewById(R.id.tvMenuNama);
+            tvMenuDeskripsi = itemView.findViewById(R.id.tvMenuDeskripsi);
+            tvMenuKategori = itemView.findViewById(R.id.tvMenuKategori);
             tvMenuHarga = itemView.findViewById(R.id.tvMenuHarga);
+            tvMenuStatus = itemView.findViewById(R.id.tvMenuStatus);
             tvMenuIcon = itemView.findViewById(R.id.tvMenuIcon);
             ivMenuImage = itemView.findViewById(R.id.ivMenuImage);
-            btnTambah = itemView.findViewById(R.id.btnTambah);
-            cardBtnTambah = itemView.findViewById(R.id.cardBtnTambah);
+            btnToggleStatus = itemView.findViewById(R.id.btnToggleStatus);
+            btnEditMenu = itemView.findViewById(R.id.btnEditMenu);
+            btnDeleteMenu = itemView.findViewById(R.id.btnDeleteMenu);
+            cardMenuStatus = itemView.findViewById(R.id.cardMenuStatus);
         }
     }
 }

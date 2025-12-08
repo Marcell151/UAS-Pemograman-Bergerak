@@ -1,19 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.example.kantinkampus">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" />
 
     <application
         android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
-        android:label="Kantin KampusKu"
+        android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
+        android:theme="@style/Base.Theme.UAS_PemrogramanBergerak"
+        tools:targetApi="31">
 
-        <!-- MAIN LAUNCHER - LoginActivity -->
         <activity
-            android:name=".LoginActivity"
+            android:name=".SplashActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -21,79 +28,27 @@
             </intent-filter>
         </activity>
 
-        <!-- Authentication Activities -->
         <activity
-            android:name=".RegisterActivity"
-            android:parentActivityName=".LoginActivity"
-            android:exported="false" />
-
-        <!-- Admin Activities -->
-        <activity
-            android:name=".SellerDashboardActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".ManageOrdersActivity"
-            android:parentActivityName=".SellerDashboardActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".ManageStandActivity"
-            android:parentActivityName=".SellerDashboardActivity"
-            android:exported="false" />
+            android:name=".LoginActivity"
+            android:exported="false" /> <activity android:name=".RegisterActivity" />
+        <activity android:name=".MainActivity" />
+        <activity android:name=".ProfileActivity" android:label="Edit Profil" />
+        <activity android:name=".SellerDashboardActivity" />
+        <activity android:name=".ManageStandActivity" />
+        <activity android:name=".ManageMenusActivity" />
+        <activity android:name=".ManageOrdersActivity" />
+        <activity android:name=".StandListActivity" />
+        <activity android:name=".MenuListActivity" />
+        <activity android:name=".MenuDetailActivity" />
+        <activity android:name=".CartActivity" />
+        <activity android:name=".OrderHistoryActivity" />
+        <activity android:name=".FavoritesActivity" />
+        <activity android:name=".AddReviewActivity" />
+        <activity android:name=".AboutActivity" />
 
         <activity
-            android:name=".ManageMenusActivity"
-            android:parentActivityName=".SellerDashboardActivity"
-            android:exported="false" />
-
-
-        <!-- Customer Activities -->
-        <activity
-            android:name=".MainActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".StandListActivity"
-            android:parentActivityName=".MainActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".MenuListActivity"
-            android:parentActivityName=".StandListActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".MenuDetailActivity"
-            android:parentActivityName=".MenuListActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".CartActivity"
-            android:parentActivityName=".MainActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".OrderHistoryActivity"
-            android:parentActivityName=".MainActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".FavoritesActivity"
-            android:parentActivityName=".MainActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".AddReviewActivity"
-            android:parentActivityName=".MenuDetailActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".AboutActivity"
-            android:parentActivityName=".MainActivity"
-            android:exported="false" />
-
-
-    </application>
+            android:name=".OrderDetailActivity"
+            android:label="Detail Pesanan"
+            android:parentActivityName=".OrderHistoryActivity" /> </application>
 
 </manifest>
