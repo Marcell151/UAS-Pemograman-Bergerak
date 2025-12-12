@@ -5,7 +5,11 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -16,6 +20,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "KantinKampus.db";
     private static final int DATABASE_VERSION = 2;
+    private final Context context; // Context untuk akses drawable
 
     // ================= TABLE NAMES & COLUMNS =================
     public static final String TABLE_USERS = "users";
@@ -94,11 +99,12 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public DBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        this.context = context;
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        // Create Tables
+        // Create All Tables
         db.execSQL("CREATE TABLE " + TABLE_USERS + "(" + COLUMN_USER_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," + COLUMN_USER_EMAIL + " TEXT UNIQUE," + COLUMN_USER_PASSWORD + " TEXT," + COLUMN_USER_NAME + " TEXT," + COLUMN_USER_ROLE + " TEXT," + COLUMN_USER_PHONE + " TEXT," + COLUMN_USER_NIM_NIP + " TEXT," + COLUMN_USER_TYPE + " TEXT," + COLUMN_USER_BUSINESS_LICENSE + " TEXT," + COLUMN_USER_STAND_ID + " INTEGER," + COLUMN_USER_CREATED_AT + " TEXT)");
         db.execSQL("CREATE TABLE " + TABLE_STAND + "(" + COLUMN_STAND_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," + COLUMN_STAND_NAME + " TEXT," + COLUMN_STAND_DESC + " TEXT," + COLUMN_STAND_IMAGE + " TEXT," + COLUMN_STAND_OWNER_ID + " INTEGER," + COLUMN_STAND_OVO + " TEXT," + COLUMN_STAND_GOPAY + " TEXT," + COLUMN_STAND_CREATED_AT + " TEXT)");
         db.execSQL("CREATE TABLE " + TABLE_MENU + "(" + COLUMN_MENU_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," + COLUMN_MENU_STAND_ID + " INTEGER," + COLUMN_MENU_NAME + " TEXT," + COLUMN_MENU_PRICE + " INTEGER," + COLUMN_MENU_IMAGE + " TEXT," + COLUMN_MENU_DESC + " TEXT," + COLUMN_MENU_CATEGORY + " TEXT," + COLUMN_MENU_STATUS + " TEXT DEFAULT 'available')");
@@ -108,14 +114,76 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL("CREATE TABLE " + TABLE_FAVORITES + "(" + COLUMN_FAV_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," + COLUMN_FAV_USER_ID + " INTEGER," + COLUMN_FAV_MENU_ID + " INTEGER," + "UNIQUE(" + COLUMN_FAV_USER_ID + ", " + COLUMN_FAV_MENU_ID + "))");
         db.execSQL("CREATE TABLE " + TABLE_REVIEWS + "(" + COLUMN_REVIEW_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," + COLUMN_REVIEW_USER_ID + " INTEGER," + COLUMN_REVIEW_MENU_ID + " INTEGER," + COLUMN_REVIEW_ORDER_ID + " INTEGER," + COLUMN_REVIEW_RATING + " INTEGER," + COLUMN_REVIEW_COMMENT + " TEXT," + COLUMN_REVIEW_DATE + " TEXT)");
 
+        // Insert Data Awal
         insertDemoData(db);
     }
 
     private void insertDemoData(SQLiteDatabase db) {
         String date = getDateTime();
-        // (Data Demo sama seperti sebelumnya, dipersingkat di sini agar tidak panjang)
-        // Jika Anda sudah pernah run, data ini tidak akan masuk lagi kecuali uninstall app
-        // ... (Kode Demo Data Anda tetap ada di sini) ...
+
+        // 1. BUAT 4 USER DEMO
+        // Penjual 1: Ibu Siti
+        db.execSQL("INSERT INTO " + TABLE_USERS + " (" + COLUMN_USER_EMAIL + ", " + COLUMN_USER_PASSWORD + ", " + COLUMN_USER_NAME + ", " + COLUMN_USER_ROLE + ", " + COLUMN_USER_PHONE + ", " + COLUMN_USER_BUSINESS_LICENSE + ", " + COLUMN_USER_STAND_ID + ", " + COLUMN_USER_CREATED_AT + ") VALUES ('penjual01@gmail.com', 'user123', 'Ibu Siti', 'seller', '081234567890', 'UKM-001', 1, '" + date + "')");
+
+        // Penjual 2: Pak Budi
+        db.execSQL("INSERT INTO " + TABLE_USERS + " (" + COLUMN_USER_EMAIL + ", " + COLUMN_USER_PASSWORD + ", " + COLUMN_USER_NAME + ", " + COLUMN_USER_ROLE + ", " + COLUMN_USER_PHONE + ", " + COLUMN_USER_BUSINESS_LICENSE + ", " + COLUMN_USER_STAND_ID + ", " + COLUMN_USER_CREATED_AT + ") VALUES ('penjual02@gmail.com', 'user123', 'Pak Budi', 'seller', '081987654321', 'UKM-002', 2, '" + date + "')");
+
+        // Pembeli 1: Mahasiswa (Andi)
+        db.execSQL("INSERT INTO " + TABLE_USERS + " (" + COLUMN_USER_EMAIL + ", " + COLUMN_USER_PASSWORD + ", " + COLUMN_USER_NAME + ", " + COLUMN_USER_ROLE + ", " + COLUMN_USER_PHONE + ", " + COLUMN_USER_NIM_NIP + ", " + COLUMN_USER_TYPE + ", " + COLUMN_USER_CREATED_AT + ") VALUES ('pembeli01@gmail.com', 'user123', 'Andi Mahasiswa', 'buyer', '085555555555', '12345678', 'mahasiswa', '" + date + "')");
+
+        // Pembeli 2: Dosen (Pak Harto)
+        db.execSQL("INSERT INTO " + TABLE_USERS + " (" + COLUMN_USER_EMAIL + ", " + COLUMN_USER_PASSWORD + ", " + COLUMN_USER_NAME + ", " + COLUMN_USER_ROLE + ", " + COLUMN_USER_PHONE + ", " + COLUMN_USER_NIM_NIP + ", " + COLUMN_USER_TYPE + ", " + COLUMN_USER_CREATED_AT + ") VALUES ('pembeli02@gmail.com', 'user123', 'Bpk. Harto (Dosen)', 'buyer', '087777777777', '987654321', 'dosen', '" + date + "')");
+
+        // 2. BUAT 2 STAND
+        // Stand 1: Kantin Bu Siti
+        db.execSQL("INSERT INTO " + TABLE_STAND + " (" + COLUMN_STAND_ID + ", " + COLUMN_STAND_NAME + ", " + COLUMN_STAND_DESC + ", " + COLUMN_STAND_OWNER_ID + ", " + COLUMN_STAND_OVO + ", " + COLUMN_STAND_CREATED_AT + ") VALUES (1, 'Kantin Bu Siti', 'Masakan rumahan enak, murah, dan higienis.', 1, '081234567890', '" + date + "')");
+
+        // Stand 2: Warung Pak Budi
+        db.execSQL("INSERT INTO " + TABLE_STAND + " (" + COLUMN_STAND_ID + ", " + COLUMN_STAND_NAME + ", " + COLUMN_STAND_DESC + ", " + COLUMN_STAND_OWNER_ID + ", " + COLUMN_STAND_GOPAY + ", " + COLUMN_STAND_CREATED_AT + ") VALUES (2, 'Warung Pak Budi', 'Aneka minuman segar, kopi, dan gorengan panas.', 2, '081987654321', '" + date + "')");
+
+        // 3. SIAPKAN GAMBAR DUMMY
+        // Mengcopy gambar dari drawable agar punya path file yang valid untuk Bitmap
+        String pathNasi = copyDrawableToStorage(R.drawable.nasi_goreng, "nasi_goreng.jpg");
+        String pathEs = copyDrawableToStorage(R.drawable.es_teh, "es_teh.jpg");
+
+        // 4. BUAT MENU AWAL (Dengan Gambar)
+        // Menu Stand 1: Nasi Goreng
+        ContentValues menu1 = new ContentValues();
+        menu1.put(COLUMN_MENU_STAND_ID, 1);
+        menu1.put(COLUMN_MENU_NAME, "Nasi Goreng Spesial");
+        menu1.put(COLUMN_MENU_PRICE, 15000);
+        menu1.put(COLUMN_MENU_DESC, "Nasi goreng lengkap dengan telur, ayam suwir, dan kerupuk.");
+        menu1.put(COLUMN_MENU_CATEGORY, "Makanan Berat");
+        menu1.put(COLUMN_MENU_STATUS, "available");
+        if (!pathNasi.isEmpty()) menu1.put(COLUMN_MENU_IMAGE, pathNasi);
+        db.insert(TABLE_MENU, null, menu1);
+
+        // Menu Stand 2: Es Teh
+        ContentValues menu2 = new ContentValues();
+        menu2.put(COLUMN_MENU_STAND_ID, 2);
+        menu2.put(COLUMN_MENU_NAME, "Es Teh Manis Jumbo");
+        menu2.put(COLUMN_MENU_PRICE, 5000);
+        menu2.put(COLUMN_MENU_DESC, "Teh manis segar ukuran gelas jumbo. Bisa request es batu.");
+        menu2.put(COLUMN_MENU_CATEGORY, "Minuman");
+        menu2.put(COLUMN_MENU_STATUS, "available");
+        if (!pathEs.isEmpty()) menu2.put(COLUMN_MENU_IMAGE, pathEs);
+        db.insert(TABLE_MENU, null, menu2);
+    }
+
+    // Helper Copy Drawable -> Internal Storage
+    private String copyDrawableToStorage(int drawableId, String fileName) {
+        try {
+            Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), drawableId);
+            File file = new File(context.getFilesDir(), fileName);
+            FileOutputStream out = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+            out.flush();
+            out.close();
+            return file.getAbsolutePath();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "";
+        }
     }
 
     @Override
@@ -132,9 +200,8 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     // ==========================================
-    // PRIVATE HELPER (SOLUSI BUG GAMBAR & STATUS)
+    // PRIVATE HELPER (STANDARISASI MENU)
     // ==========================================
-    // Method ini memastikan semua pengambilan menu SERAGAM
     private Menu mapCursorToMenu(Cursor cursor) {
         Menu menu = new Menu();
         menu.setId(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_MENU_ID)));
@@ -145,20 +212,17 @@ public class DBHelper extends SQLiteOpenHelper {
         menu.setKategori(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MENU_CATEGORY)));
         menu.setStatus(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MENU_STATUS)));
 
-        // PENTING: Ambil Gambar
         int idxImage = cursor.getColumnIndex(COLUMN_MENU_IMAGE);
         if (idxImage != -1) {
             menu.setImage(cursor.getString(idxImage));
         }
 
-        // PENTING: Cek Status Favorit (jika ada kolom fav_id dari hasil query JOIN)
         int idxFav = cursor.getColumnIndex("fav_id");
         if (idxFav != -1 && !cursor.isNull(idxFav)) {
             menu.setFavorite(true);
         } else {
             menu.setFavorite(false);
         }
-
         return menu;
     }
 
@@ -184,7 +248,6 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     public User loginUser(String email, String password) {
-        // Deprecated use in some flows, but kept for LogicLogin
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.query(TABLE_USERS, null, COLUMN_USER_EMAIL + "=? AND " + COLUMN_USER_PASSWORD + "=?", new String[]{email, password}, null, null, null);
         if (cursor != null && cursor.moveToFirst()) {
@@ -301,9 +364,8 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     // ==========================================
-    // MENU MANAGEMENT (SEMUA METODE DISERAGAMKAN)
+    // MENU MANAGEMENT
     // ==========================================
-
     public long addMenu(int standId, String nama, int harga, String desc, String category, String status) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -339,7 +401,7 @@ public class DBHelper extends SQLiteOpenHelper {
         return db.delete(TABLE_MENU, COLUMN_MENU_ID + " = ?", new String[]{String.valueOf(id)});
     }
 
-    // [Seller] Get Menus
+    // Seller: Get All Menus
     public List<Menu> getMenusByStand(int standId) {
         List<Menu> menus = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
@@ -347,44 +409,31 @@ public class DBHelper extends SQLiteOpenHelper {
                 new String[]{String.valueOf(standId)});
         if (cursor.moveToFirst()) {
             do {
-                menus.add(mapCursorToMenu(cursor)); // PAKAI HELPER BARU
+                menus.add(mapCursorToMenu(cursor));
             } while (cursor.moveToNext());
         }
         cursor.close();
         return menus;
     }
 
-    // [Buyer] Get Menus (List) with Favorite Status
+    // Buyer: Get Menu List (With Favorite Status)
     public List<Menu> getMenuByStandId(int standId, int userId) {
         List<Menu> menus = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-        // Left Join dengan Favorites untuk cek status like
         String query = "SELECT m.*, f." + COLUMN_FAV_ID + " as fav_id FROM " + TABLE_MENU + " m " +
                 " LEFT JOIN " + TABLE_FAVORITES + " f ON m." + COLUMN_MENU_ID + " = f." + COLUMN_FAV_MENU_ID +
                 " AND f." + COLUMN_FAV_USER_ID + " = ? WHERE m." + COLUMN_MENU_STAND_ID + " = ?";
         Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(userId), String.valueOf(standId)});
         if (cursor.moveToFirst()) {
             do {
-                menus.add(mapCursorToMenu(cursor)); // PAKAI HELPER BARU
+                menus.add(mapCursorToMenu(cursor));
             } while (cursor.moveToNext());
         }
         cursor.close();
         return menus;
     }
 
-    // [Buyer] Get Menu Detail
-    public Menu getMenuById(int menuId) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.query(TABLE_MENU, null, COLUMN_MENU_ID + "=?", new String[]{String.valueOf(menuId)}, null, null, null);
-        if (cursor != null && cursor.moveToFirst()) {
-            Menu menu = mapCursorToMenu(cursor); // PAKAI HELPER BARU
-            cursor.close();
-            return menu;
-        }
-        return null;
-    }
-
-    // [Buyer] Search
+    // Buyer: Search
     public List<Menu> searchMenus(int standId, String keyword, int userId) {
         List<Menu> menus = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
@@ -401,7 +450,7 @@ public class DBHelper extends SQLiteOpenHelper {
         return menus;
     }
 
-    // [Buyer] Filter Category
+    // Buyer: Filter Category
     public List<Menu> getMenusByCategory(int standId, String category, int userId) {
         List<Menu> menus = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
@@ -418,18 +467,29 @@ public class DBHelper extends SQLiteOpenHelper {
         return menus;
     }
 
-    // [Buyer] Favorite Page
+    // Buyer: Get Menu Detail
+    public Menu getMenuById(int menuId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.query(TABLE_MENU, null, COLUMN_MENU_ID + "=?", new String[]{String.valueOf(menuId)}, null, null, null);
+        if (cursor != null && cursor.moveToFirst()) {
+            Menu menu = mapCursorToMenu(cursor);
+            cursor.close();
+            return menu;
+        }
+        return null;
+    }
+
+    // Buyer: Favorites Page
     public List<Menu> getFavoriteMenus(int userId) {
         List<Menu> menus = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-        // JOIN Tabel Menu agar dapat data terbaru (termasuk status & image)
         String query = "SELECT m.*, f." + COLUMN_FAV_ID + " as fav_id FROM " + TABLE_MENU + " m " +
                 " JOIN " + TABLE_FAVORITES + " f ON m." + COLUMN_MENU_ID + " = f." + COLUMN_FAV_MENU_ID +
                 " WHERE f." + COLUMN_FAV_USER_ID + " = ?";
         Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(userId)});
         if (cursor.moveToFirst()) {
             do {
-                menus.add(mapCursorToMenu(cursor)); // Data selalu fresh dari tabel menu
+                menus.add(mapCursorToMenu(cursor));
             } while (cursor.moveToNext());
         }
         cursor.close();
@@ -437,7 +497,7 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     // ==========================================
-    // CART & ORDER (Simple)
+    // CART & ORDER
     // ==========================================
     public long addToCart(int userId, int menuId, int qty, String notes) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -480,7 +540,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 menu.setHarga(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_MENU_PRICE)));
                 menu.setStandId(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_MENU_STAND_ID)));
                 int idxImg = cursor.getColumnIndex(COLUMN_MENU_IMAGE);
-                if(idxImg != -1) menu.setImage(cursor.getString(idxImg)); // Fix Image Cart
+                if(idxImg != -1) menu.setImage(cursor.getString(idxImg));
                 item.setMenu(menu);
                 items.add(item);
             } while (cursor.moveToNext());
@@ -586,21 +646,6 @@ public class DBHelper extends SQLiteOpenHelper {
         return orders;
     }
 
-    private Order cursorToOrder(Cursor cursor) {
-        Order order = new Order();
-        order.setId(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ORDER_ID)));
-        order.setUserId(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ORDER_USER_ID)));
-        order.setStandId(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ORDER_STAND_ID)));
-        order.setTotal(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ORDER_TOTAL)));
-        order.setStatus(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ORDER_STATUS)));
-        order.setPaymentMethod(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ORDER_PAYMENT_METHOD)));
-        order.setPaymentStatus(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ORDER_PAYMENT_STATUS)));
-        order.setCreatedAt(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ORDER_DATE)));
-        int idxProof = cursor.getColumnIndex(COLUMN_ORDER_PAYMENT_PROOF);
-        if (idxProof != -1) order.setPaymentProofPath(cursor.getString(idxProof));
-        return order;
-    }
-
     public Order getOrderById(int orderId) {
         SQLiteDatabase db = this.getReadableDatabase();
         String query = "SELECT o.*, u." + COLUMN_USER_NAME + " as user_name, s." + COLUMN_STAND_NAME +
@@ -643,6 +688,21 @@ public class DBHelper extends SQLiteOpenHelper {
         }
         cursor.close();
         return items;
+    }
+
+    private Order cursorToOrder(Cursor cursor) {
+        Order order = new Order();
+        order.setId(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ORDER_ID)));
+        order.setUserId(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ORDER_USER_ID)));
+        order.setStandId(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ORDER_STAND_ID)));
+        order.setTotal(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ORDER_TOTAL)));
+        order.setStatus(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ORDER_STATUS)));
+        order.setPaymentMethod(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ORDER_PAYMENT_METHOD)));
+        order.setPaymentStatus(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ORDER_PAYMENT_STATUS)));
+        order.setCreatedAt(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_ORDER_DATE)));
+        int idxProof = cursor.getColumnIndex(COLUMN_ORDER_PAYMENT_PROOF);
+        if (idxProof != -1) order.setPaymentProofPath(cursor.getString(idxProof));
+        return order;
     }
 
     public int updateOrderStatus(int orderId, String status) {
